@@ -29,6 +29,8 @@ const account = new Proxy(accountValues, {
   },
 });
 
+// Elements
+
 // Canvas
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
@@ -46,6 +48,7 @@ ctxNext.canvas.height = 4 * BLOCK_SIZE;
 // scale을 사용해서 블록의 크기를 1로 취급하도록 설정
 ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
 
+// Board instance
 const board = new Board({rows: ROWS, cols: COLS}, ctx, ctxNext, account);
 
 // 키보드 입력 이벤트
@@ -90,6 +93,7 @@ document.addEventListener('keydown', event => {
   }
 });
 
+// Functions
 function play() {
   board.reset();
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
