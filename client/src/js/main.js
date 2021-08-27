@@ -1,3 +1,5 @@
+const socket = io();
+
 // 게임 초기화와 종료 코드
 let requestId = null;
 const time = {
