@@ -1,3 +1,4 @@
+// Socket instnace
 const socket = io();
 
 // 게임 초기화와 종료 코드
@@ -13,6 +14,8 @@ const accountValues = {
   score: 0,
   lines: 0,
   level: 0,
+  user: '',
+  ready: false,
 };
 
 // Account Proxy
@@ -32,6 +35,10 @@ const account = new Proxy(accountValues, {
 });
 
 // Elements
+const $greeting = document.getElementById('greeting');
+const $main = document.getElementById('main');
+const $userForm = document.getElementById('user-form');
+const $userInput = document.getElementById('user-input');
 
 // Canvas
 const canvas = document.getElementById('board');
@@ -52,6 +59,13 @@ ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
 
 // Board instance
 const board = new Board({rows: ROWS, cols: COLS}, ctx, ctxNext, account);
+
+// Socket on
+socket.on('all-ready', isReady => {
+  if (isReady) {
+    play();
+  }
+});
 
 // 키보드 입력 이벤트
 document.addEventListener('keydown', event => {
@@ -95,6 +109,25 @@ document.addEventListener('keydown', event => {
   }
 });
 
+$userForm.addEventListener('submit', event => {
+  event.preventDefault();
+
+  const username = $userInput.value.trim();
+
+  if (!username.length) {
+    alert('1글자 이상 입력해주세요');
+    return false;
+  }
+
+  account.user = username;
+  $userInput.value = '';
+
+  $greeting.classList.add(HIDE_CN);
+  $main.classList.remove(HIDE_CN);
+
+  enterUser(account);
+});
+
 // Functions
 function play() {
   board.reset();
@@ -136,4 +169,15 @@ function updateAccount(key, value) {
   if ($el) {
     $el.textContent = value;
   }
+}
+
+// Socket Events
+function ready() {
+  account.ready = !account.ready;
+
+  socket.emit('user-ready', account);
+}
+
+function enterUser(account) {
+  socket.emit('user-enter', account);
 }

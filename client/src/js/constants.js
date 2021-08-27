@@ -7,6 +7,8 @@ const LINES_PER_LEVEL = 10;
 
 const MINUS_PER_LEVEL = 80;
 
+const HIDE_CN = 'hide';
+
 // enumeration
 const KEY = {
   LEFT: 'ArrowLeft',

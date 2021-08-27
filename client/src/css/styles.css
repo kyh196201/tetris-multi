@@ -14,6 +14,11 @@
   padding: 100px 0;
 }
 
+.greeting.hide,
+.main.hide {
+  display: none;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 320px 200px;

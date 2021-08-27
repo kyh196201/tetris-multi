@@ -20,7 +20,7 @@
 <body>
 	<div class="container">
 		<!-- greeting -->
-		<div id="greeting">
+		<div id="greeting" class="greeting">
 			<form id="user-form">
 				<div class="mb-3">
 					<label for="user-input" class="form-label">User Name: </label>
@@ -31,7 +31,7 @@
 		</div>
 
 		<!-- game -->
-		<div id="main">
+		<div id="main" class="main hide">
 			<div class="grid">
 				<canvas id="board" class="game-board"></canvas>
 				<div class="right-column">
@@ -40,9 +40,11 @@
 						<p>Score: <span id="score"></span></p>
 						<p>Lines: <span id="lines"></span></p>
 						<p>Level: <span id="level"></span></p>
+						<p>Username: <span id="user"></span></p>
 						<canvas id="next" class="next"></canvas>
 					</div>
-					<button onclick="play()" class="play-button">Play</button>
+					<button id="ready-btn" onclick="ready()" class="play-button">Ready</button>
+					<!-- <button onclick="play()" class="play-button">Play</button> -->
 				</div>
 			</div>
 			<div class="games"></div>
