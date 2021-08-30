@@ -252,11 +252,27 @@ function updateBoard({id, board}) {
 }
 
 function drawUserBoard(ctx, board) {
-  const {grid} = board;
+  const {grid, piece} = board;
+
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   if (grid.length) {
     grid.forEach((row, y) => {
       row.forEach((value, x) => {
+        if (value > 0) {
+          ctx.fillStyle = COLORS[value - 1];
+          ctx.fillRect(x, y, 1, 1);
+        }
+      });
+    });
+  }
+
+  if (piece?.shape?.length) {
+    piece.shape.forEach((row, dy) => {
+      row.forEach((value, dx) => {
+        const x = piece.x + dx;
+        const y = piece.y + dy;
+
         if (value > 0) {
           ctx.fillStyle = COLORS[value - 1];
           ctx.fillRect(x, y, 1, 1);
