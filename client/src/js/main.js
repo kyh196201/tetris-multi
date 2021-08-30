@@ -178,15 +178,18 @@ $userForm.addEventListener('submit', event => {
 });
 
 // Functions
-function play() {
+function setup() {
   setupBoardList();
 
   board.reset();
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
-  animate();
+}
 
+function play() {
   account.status = STATUS.PLAYING;
+  setup();
+  animate();
 }
 
 function animate(now = 0) {
@@ -341,6 +344,17 @@ function ready() {
     id: socket.id,
     account,
   });
+}
+
+function leave() {
+  if (account.status === STATUS.PLAYING) return;
+
+  socket.emit('user-leave', {
+    id: socket.id,
+  });
+
+  $greeting.classList.remove(HIDE_CN);
+  $main.classList.add(HIDE_CN);
 }
 
 function emitUserEnter(account) {

@@ -46,11 +46,20 @@
 }
 
 .play-button,
-.ready-button {
+.ready-button,
+.leave-button {
+  display: block;
+  width: 100%;
   background-color: #4caf50;
   font-size: 16px;
+  font-weight: bold;
   padding: 15px 30px;
   cursor: pointer;
+}
+
+.leave-button {
+  margin-top: 10px;
+  background-color: #339af0;
 }
 
 .ready-button.ready::after {

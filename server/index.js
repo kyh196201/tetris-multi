@@ -36,6 +36,16 @@ io.on('connection', socket => {
     }
   });
 
+  socket.on('user-leave', ({id}) => {
+    const index = users.findIndex(u => u.id === id);
+
+    if (index === -1) return;
+
+    users.splice(index, 1);
+
+    io.emit('update-users', users);
+  });
+
   // ready event
   socket.on('user-ready', ({id, account}) => {
     const user = users.find(u => u.id === id);
