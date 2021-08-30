@@ -98,6 +98,10 @@ io.on('connection', socket => {
     if (index > -1) {
       users.splice(index, 1);
       io.emit('update-users', users);
+
+      if (!users.length) {
+        isPlaying = false;
+      }
     }
   });
 });
