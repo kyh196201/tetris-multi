@@ -37,7 +37,7 @@ io.on('connection', socket => {
   });
 
   socket.on('user-leave', ({id}) => {
-    const index = users.findIndex(u => u.id === id);
+    const index = findUserIndex(id);
 
     if (index === -1) return;
 
@@ -48,7 +48,7 @@ io.on('connection', socket => {
 
   // ready event
   socket.on('user-ready', ({id, account}) => {
-    const user = users.find(u => u.id === id);
+    const user = findUser(id);
 
     if (!user) return;
 
@@ -72,7 +72,7 @@ io.on('connection', socket => {
   });
 
   socket.on('user-gameover', ({id, account}) => {
-    const user = users.find(u => u.id === id);
+    const user = findUser(id);
 
     if (!user) return;
 
@@ -90,8 +90,27 @@ io.on('connection', socket => {
       isPlaying = false;
     }
   });
+
+  // disconnect
+  socket.on('disconnect', () => {
+    const index = findUserIndex(socket.id);
+
+    if (index > -1) {
+      users.splice(index, 1);
+      io.emit('update-users', users);
+    }
+  });
 });
 
 server.listen(3000, () => {
   console.log('listening on *:3000');
 });
+
+// Functions
+function findUser(id) {
+  return users.find(user => user.id === id);
+}
+
+function findUserIndex(id) {
+  return users.findIndex(user => user.id === id);
+}

@@ -111,6 +111,8 @@ document.addEventListener('keydown', event => {
   const {code} = event;
 
   if (moves[code]) {
+    if (account.status !== STATUS.PLAYING) return;
+
     event.preventDefault();
 
     // NOTE ✨ 얕은 복사를 할 경우 p는 piece의 인스턴스가 아니라 일반 객체가 된다.
