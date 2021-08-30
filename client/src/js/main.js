@@ -180,17 +180,18 @@ $userForm.addEventListener('submit', event => {
 });
 
 // Functions
-function setup() {
-  setupBoardList();
-
-  board.reset();
+function setupGame() {
+  clearBoardList();
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
+  board.reset();
 }
 
 function play() {
   account.status = STATUS.PLAYING;
-  setup();
+
+  setupGame();
+  setupBoardList();
   animate();
 }
 
@@ -272,8 +273,7 @@ function setupBoardList() {
 
   if (!otherUsers.length) return;
 
-  $boardList.innerHTML = '';
-  userBoards = [];
+  clearBoardList();
 
   otherUsers.forEach(u => {
     const canvas = document.createElement('canvas');
@@ -293,6 +293,11 @@ function setupBoardList() {
 
     $boardList.appendChild(canvas);
   });
+}
+
+function clearBoardList() {
+  $boardList.innerHTML = '';
+  userBoards = [];
 }
 
 function updateBoard({id, board}) {
@@ -351,6 +356,7 @@ function ready() {
 function leave() {
   if (account.status === STATUS.PLAYING) return;
 
+  setupGame();
   socket.emit('user-leave', {
     id: socket.id,
   });
