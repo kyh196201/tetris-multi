@@ -261,8 +261,8 @@ function printUserList() {
 
 function printUserListItem(user) {
   return `<li>
-    ${user.account.username} ${socket.id === user.id ? '나' : ''} ${
-    user.account.ready ? 'ready' : ''
+    ${user.account.username} ${socket.id === user.id ? '(나)' : ''} ${
+    user.account.ready ? '<strong>ready</strong>' : ''
   }
   </li>`;
 }
