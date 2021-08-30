@@ -187,6 +187,12 @@ function setupGame() {
   board.reset();
 }
 
+function clearTime() {
+  time.start = 0;
+  time.elapsed = 0;
+  time.level = 800;
+}
+
 function play() {
   account.status = STATUS.PLAYING;
 
@@ -230,6 +236,7 @@ function gameOver() {
 
   account.status = STATUS.GAMEOVER;
   account.ready = false;
+  clearTime();
   emitUpdateBoard();
   emitGameOver();
 }
