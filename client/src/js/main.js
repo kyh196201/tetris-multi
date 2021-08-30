@@ -35,6 +35,14 @@ const account = new Proxy(accountValues, {
       const newLevel = Math.max(40, time.level - MINUS_PER_LEVEL * value);
 
       time.level = newLevel;
+    } else if (key === 'ready') {
+      const $target = document.getElementById('ready-btn');
+
+      if (value) {
+        $target.classList.add('ready');
+      } else {
+        $target.classList.remove('ready');
+      }
     }
 
     return true;
@@ -84,6 +92,18 @@ socket.on('play', isPlay => {
 
 socket.on('update-board', data => {
   updateBoard(data);
+});
+
+socket.on('access-denied', data => {
+  alert(data.message);
+});
+
+socket.on('gameover', ({users}) => {
+  console.log('게임이 종료되었습니다.');
+
+  userList = [...users];
+  account.status = '';
+  printUserList();
 });
 
 // 키보드 입력 이벤트
@@ -202,7 +222,10 @@ function gameOver() {
   ctx.fillStyle = 'red';
   ctx.fillText('GAME OVER', 1.2, 4);
 
+  account.status = STATUS.GAMEOVER;
+  account.ready = false;
   emitUpdateBoard();
+  emitGameOver();
 }
 
 function pause() {
@@ -244,6 +267,7 @@ function setupBoardList() {
 
   if (!otherUsers.length) return;
 
+  $boardList.innerHTML = '';
   userBoards = [];
 
   otherUsers.forEach(u => {
@@ -308,18 +332,10 @@ function drawUserBoard(ctx, board) {
 }
 
 // Socket Events
-function ready(event) {
+function ready() {
   if (account.status === STATUS.PLAYING) return;
 
   account.ready = !account.ready;
-
-  const $target = event.target;
-
-  if (account.ready) {
-    $target.classList.add('ready');
-  } else {
-    $target.classList.remove('ready');
-  }
 
   socket.emit('user-ready', {
     id: socket.id,
@@ -338,5 +354,12 @@ function emitUpdateBoard() {
   socket.emit('update-board', {
     id: socket.id,
     board,
+  });
+}
+
+function emitGameOver() {
+  socket.emit('user-gameover', {
+    id: socket.id,
+    account,
   });
 }

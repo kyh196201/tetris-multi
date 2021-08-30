@@ -10,6 +10,8 @@ const io = new Server(server);
 
 const users = [];
 
+let isPlaying = false;
+
 app.use(express.static(path.join(__dirname, '../client')));
 
 app.get('/', (req, res) => {
@@ -23,9 +25,15 @@ io.on('connection', socket => {
   // Socket events
   // user enter event
   socket.on('user-enter', data => {
-    users.push(data);
+    if (!isPlaying) {
+      users.push(data);
 
-    io.emit('update-users', users);
+      io.emit('update-users', users);
+    } else {
+      io.to(data.id).emit('access-denied', {
+        message: '게임이 이미 시작되었습니다.',
+      });
+    }
   });
 
   // ready event
@@ -35,6 +43,7 @@ io.on('connection', socket => {
     if (!user) return;
 
     user.account = {
+      ...user.account,
       ...account,
     };
 
@@ -44,11 +53,32 @@ io.on('connection', socket => {
 
     if (isAllReady) {
       io.emit('play', true);
+      isPlaying = true;
     }
   });
 
   socket.on('update-board', data => {
     socket.broadcast.emit('update-board', data);
+  });
+
+  socket.on('user-gameover', ({id, account}) => {
+    const user = users.find(u => u.id === id);
+
+    if (!user) return;
+
+    user.account = {
+      ...user.account,
+      ...account,
+    };
+
+    const isAllGameover = users.every(u => u.account.status === 'gameover');
+
+    if (isAllGameover) {
+      io.emit('gameover', {
+        users,
+      });
+      isPlaying = false;
+    }
   });
 });
 
