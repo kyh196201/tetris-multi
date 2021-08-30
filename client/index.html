@@ -32,22 +32,26 @@
 
 		<!-- game -->
 		<div id="main" class="main hide">
-			<div class="grid">
-				<canvas id="board" class="game-board"></canvas>
-				<div class="right-column">
-					<div>
-						<h1>tetris</h1>
-						<p>Score: <span id="score"></span></p>
-						<p>Lines: <span id="lines"></span></p>
-						<p>Level: <span id="level"></span></p>
-						<p>Username: <span id="user"></span></p>
-						<canvas id="next" class="next"></canvas>
+			<div class="main__games">
+				<div class="grid">
+					<canvas id="board" class="game-board"></canvas>
+					<div class="right-column">
+						<div>
+							<h1>tetris</h1>
+							<p>Score: <span id="score"></span></p>
+							<p>Lines: <span id="lines"></span></p>
+							<p>Level: <span id="level"></span></p>
+							<p>Username: <span id="user"></span></p>
+							<canvas id="next" class="next"></canvas>
+						</div>
+						<button id="ready-btn" onclick="ready(event)" class="ready-button">Ready</button>
+						<!-- <button onclick="play()" class="play-button">Play</button> -->
 					</div>
-					<button id="ready-btn" onclick="ready()" class="play-button">Ready</button>
-					<!-- <button onclick="play()" class="play-button">Play</button> -->
 				</div>
+				<ul id="user-list" class="user-list"></ul>
 			</div>
-			<div class="games"></div>
+			<!-- user-list -->
+			<div id="board-list" class="board-list"></div>
 		</div>
 	</div>
 	<script src="https://cdn.socket.io/3.1.3/socket.io.min.js"

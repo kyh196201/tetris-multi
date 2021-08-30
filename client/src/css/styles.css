@@ -19,11 +19,16 @@
   display: none;
 }
 
+.main__games {
+  display: flex;
+  margin-bottom: 50px;
+}
+
 .grid {
   display: grid;
   grid-template-columns: 320px 200px;
   width: 550px;
-  margin: 0 auto;
+  margin-right: 30px;
 }
 
 .right-column {
@@ -40,9 +45,25 @@
   border: solid 2px;
 }
 
-.play-button {
+.play-button,
+.ready-button {
   background-color: #4caf50;
   font-size: 16px;
   padding: 15px 30px;
   cursor: pointer;
+}
+
+.ready-button.ready::after {
+  content: '\2713';
+  display: inline-block;
+  margin-left: 10px;
+  padding: 0 6px 0 0;
+  color: #000;
+}
+
+.board-list {
+}
+
+.board-list canvas:not(:last-child) {
+  margin-right: 10px;
 }

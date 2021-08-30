@@ -1,6 +1,11 @@
 // Socket instnace
 const socket = io();
 
+// Data from server
+let userList = [];
+
+const userBoards = [];
+
 // 게임 초기화와 종료 코드
 let requestId = null;
 const time = {
@@ -14,7 +19,7 @@ const accountValues = {
   score: 0,
   lines: 0,
   level: 0,
-  user: '',
+  username: '',
   ready: false,
 };
 
@@ -39,6 +44,8 @@ const $greeting = document.getElementById('greeting');
 const $main = document.getElementById('main');
 const $userForm = document.getElementById('user-form');
 const $userInput = document.getElementById('user-input');
+const $userList = document.getElementById('user-list');
+const $boardList = document.getElementById('board-list');
 
 // Canvas
 const canvas = document.getElementById('board');
@@ -61,10 +68,20 @@ ctxNext.scale(BLOCK_SIZE, BLOCK_SIZE);
 const board = new Board({rows: ROWS, cols: COLS}, ctx, ctxNext, account);
 
 // Socket on
-socket.on('all-ready', isReady => {
-  if (isReady) {
+socket.on('update-users', users => {
+  userList = [...users];
+
+  printUserList();
+});
+
+socket.on('play', isPlay => {
+  if (isPlay) {
     play();
   }
+});
+
+socket.on('update-board', data => {
+  updateBoard(data);
 });
 
 // 키보드 입력 이벤트
@@ -88,9 +105,10 @@ document.addEventListener('keydown', event => {
       //   그리기 전에 이전 좌표를 지운다.
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
-      board.draw();
 
+      board.draw();
       board.drop();
+      emitUpdateBoard();
     } else if (board.valid(p)) {
       if (code === KEY.DOWN) {
         account.score += POINTS.SOFT_DROP;
@@ -103,6 +121,7 @@ document.addEventListener('keydown', event => {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
       ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
       board.draw();
+      emitUpdateBoard();
     } else {
       return false;
     }
@@ -119,17 +138,19 @@ $userForm.addEventListener('submit', event => {
     return false;
   }
 
-  account.user = username;
+  account.username = username;
   $userInput.value = '';
 
   $greeting.classList.add(HIDE_CN);
   $main.classList.remove(HIDE_CN);
 
-  enterUser(account);
+  userEnter(account);
 });
 
 // Functions
 function play() {
+  setupBoardList();
+
   board.reset();
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
@@ -148,6 +169,9 @@ function animate(now = 0) {
       gameOver();
       return;
     }
+
+    emitUpdateBoard();
+
     time.start = now;
   }
   // Clear board before drawing new state.
@@ -160,7 +184,13 @@ function animate(now = 0) {
 
 function gameOver() {
   window.cancelAnimationFrame(requestId);
-  alert('game over!');
+  ctx.fillStyle = 'black';
+  ctx.fillRect(1, 3, 8, 1.2);
+  ctx.font = '1px Arial';
+  ctx.fillStyle = 'red';
+  ctx.fillText('GAME OVER', 1.8, 4);
+
+  emitUpdateBoard();
 }
 
 function updateAccount(key, value) {
@@ -171,13 +201,99 @@ function updateAccount(key, value) {
   }
 }
 
-// Socket Events
-function ready() {
-  account.ready = !account.ready;
-
-  socket.emit('user-ready', account);
+// print user list
+function printUserList() {
+  if (userList.length) {
+    $userList.innerHTML = userList.map(u => printUserListItem(u)).join('');
+  }
 }
 
-function enterUser(account) {
-  socket.emit('user-enter', account);
+function printUserListItem(user) {
+  return `<li>
+    ${user.account.username} ${socket.id === user.id ? '나' : ''} ${
+    user.account.ready ? 'ready' : ''
+  }
+  </li>`;
+}
+
+function setupBoardList() {
+  const otherUsers = userList.filter(u => u.id !== socket.id);
+
+  if (!otherUsers.length) return;
+
+  otherUsers.forEach(u => {
+    const canvas = document.createElement('canvas');
+    const id = `${u.id}-board`;
+    const ctx = canvas.getContext('2d');
+    ctx.canvas.width = COLS * USER_BLOCK_SIZE;
+    ctx.canvas.height = ROWS * USER_BLOCK_SIZE;
+    ctx.scale(USER_BLOCK_SIZE, USER_BLOCK_SIZE);
+
+    canvas.className = 'game-board';
+    canvas.id = id;
+
+    userBoards.push({
+      id,
+      ctx,
+    });
+
+    $boardList.appendChild(canvas);
+  });
+}
+
+function updateBoard({id, board}) {
+  const boardId = `${id}-board`;
+
+  const boardItem = userBoards.find(b => b.id === boardId);
+
+  if (!boardItem) return;
+
+  drawUserBoard(boardItem.ctx, board);
+}
+
+function drawUserBoard(ctx, board) {
+  const {grid} = board;
+
+  if (grid.length) {
+    grid.forEach((row, y) => {
+      row.forEach((value, x) => {
+        if (value > 0) {
+          ctx.fillStyle = COLORS[value - 1];
+          ctx.fillRect(x, y, 1, 1);
+        }
+      });
+    });
+  }
+}
+
+// Socket Events
+function ready(event) {
+  account.ready = !account.ready;
+
+  const $target = event.target;
+
+  if (account.ready) {
+    $target.classList.add('ready');
+  } else {
+    $target.classList.remove('ready');
+  }
+
+  socket.emit('user-ready', {
+    id: socket.id,
+    account,
+  });
+}
+
+function userEnter(account) {
+  socket.emit('user-enter', {
+    id: socket.id,
+    account,
+  });
+}
+
+function emitUpdateBoard() {
+  socket.emit('update-board', {
+    id: socket.id,
+    board,
+  });
 }

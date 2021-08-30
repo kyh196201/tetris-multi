@@ -2,6 +2,7 @@
 const COLS = 10;
 const ROWS = 20;
 const BLOCK_SIZE = 30;
+const USER_BLOCK_SIZE = 15;
 
 const LINES_PER_LEVEL = 10;
 

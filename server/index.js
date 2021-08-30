@@ -8,7 +8,7 @@ const {Server} = require('socket.io');
 
 const io = new Server(server);
 
-const participants = [];
+const users = [];
 
 app.use(express.static(path.join(__dirname, '../client')));
 
@@ -18,29 +18,37 @@ app.get('/', (req, res) => {
 
 // Socket
 io.on('connection', socket => {
-  console.log('user connected');
+  console.log('user connected', socket.id);
 
   // Socket events
   // user enter event
-  socket.on('user-enter', participant => {
-    if (
-      participants.findIndex(account => account.user === participant.user) ===
-      -1
-    ) {
-      participants.push(participant);
-    }
+  socket.on('user-enter', data => {
+    users.push(data);
 
-    console.log('participants', participants);
+    io.emit('update-users', users);
   });
 
   // ready event
-  socket.on('user-ready', ({user, ready}) => {
-    const participant = participants.find(account => account.user === user);
-    participant.ready = ready;
+  socket.on('user-ready', ({id, account}) => {
+    const user = users.find(u => u.id === id);
 
-    if (participants.every(account => !!account.ready)) {
-      io.emit('all-ready', true);
+    if (!user) return;
+
+    user.account = {
+      ...account,
+    };
+
+    io.emit('update-users', users);
+
+    const isAllReady = users.every(u => !!u.account.ready);
+
+    if (isAllReady) {
+      io.emit('play', true);
     }
+  });
+
+  socket.on('update-board', data => {
+    socket.broadcast.emit('update-board', data);
   });
 });
 
