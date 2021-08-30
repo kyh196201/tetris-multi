@@ -4,10 +4,11 @@ const socket = io();
 // Data from server
 let userList = [];
 
-const userBoards = [];
+let userBoards = [];
 
 // 게임 초기화와 종료 코드
 let requestId = null;
+
 const time = {
   start: 0,
   elapsed: 0,
@@ -21,6 +22,7 @@ const accountValues = {
   level: 0,
   username: '',
   ready: false,
+  status: '',
 };
 
 // Account Proxy
@@ -89,7 +91,6 @@ document.addEventListener('keydown', event => {
   const {code} = event;
 
   if (moves[code]) {
-    // 이벤트 버블링을 막는다.
     event.preventDefault();
 
     // NOTE ✨ 얕은 복사를 할 경우 p는 piece의 인스턴스가 아니라 일반 객체가 된다.
@@ -126,6 +127,15 @@ document.addEventListener('keydown', event => {
       return false;
     }
   }
+
+  if (code === KEY.PAUSE) {
+    if (account.status === STATUS.PLAYING) {
+      pause();
+    } else if (account.status === STATUS.PAUSED) {
+      account.status = STATUS.PLAYING;
+      animate();
+    }
+  }
 });
 
 $userForm.addEventListener('submit', event => {
@@ -144,7 +154,7 @@ $userForm.addEventListener('submit', event => {
   $greeting.classList.add(HIDE_CN);
   $main.classList.remove(HIDE_CN);
 
-  userEnter(account);
+  emitUserEnter(account);
 });
 
 // Functions
@@ -155,6 +165,8 @@ function play() {
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctxNext.clearRect(0, 0, ctxNext.canvas.width, ctxNext.canvas.height);
   animate();
+
+  account.status = STATUS.PLAYING;
 }
 
 function animate(now = 0) {
@@ -188,9 +200,20 @@ function gameOver() {
   ctx.fillRect(1, 3, 8, 1.2);
   ctx.font = '1px Arial';
   ctx.fillStyle = 'red';
-  ctx.fillText('GAME OVER', 1.8, 4);
+  ctx.fillText('GAME OVER', 1.2, 4);
 
   emitUpdateBoard();
+}
+
+function pause() {
+  window.cancelAnimationFrame(requestId);
+  account.status = STATUS.PAUSED;
+
+  ctx.fillStyle = 'black';
+  ctx.fillRect(1, 3, 8, 1.2);
+  ctx.font = '1px Arial';
+  ctx.fillStyle = 'gray';
+  ctx.fillText('PAUSED', 2.2, 4);
 }
 
 function updateAccount(key, value) {
@@ -220,6 +243,8 @@ function setupBoardList() {
   const otherUsers = userList.filter(u => u.id !== socket.id);
 
   if (!otherUsers.length) return;
+
+  userBoards = [];
 
   otherUsers.forEach(u => {
     const canvas = document.createElement('canvas');
@@ -284,6 +309,8 @@ function drawUserBoard(ctx, board) {
 
 // Socket Events
 function ready(event) {
+  if (account.status === STATUS.PLAYING) return;
+
   account.ready = !account.ready;
 
   const $target = event.target;
@@ -300,7 +327,7 @@ function ready(event) {
   });
 }
 
-function userEnter(account) {
+function emitUserEnter(account) {
   socket.emit('user-enter', {
     id: socket.id,
     account,

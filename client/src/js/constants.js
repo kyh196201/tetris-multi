@@ -17,6 +17,7 @@ const KEY = {
   DOWN: 'ArrowDown',
   UP: 'ArrowUp',
   SPACE: 'Space',
+  PAUSE: 'KeyP',
 };
 
 const POINTS = {
@@ -26,6 +27,12 @@ const POINTS = {
   TETRIS: 800,
   SOFT_DROP: 1,
   HARD_DROP: 2,
+};
+
+const STATUS = {
+  PLAYING: 'playing',
+  PAUSED: 'paused',
+  GAMEOVER: 'gameover',
 };
 
 const COLORS = ['cyan', 'blue', 'orange', 'yellow', 'green', 'purple', 'red'];
