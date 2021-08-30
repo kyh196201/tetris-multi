@@ -7,3 +7,9 @@
 - [nodejs-socket.io](https://poiemaweb.com/nodejs-socketio)
 
 ---
+
+### TODO
+
+[] 일시 정지 기능
+[] CSS 스타일링
+[] Game over 타이밍 수정
